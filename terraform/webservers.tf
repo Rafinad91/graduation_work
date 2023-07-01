@@ -86,4 +86,16 @@ output "internal_ip_address_vm_2" {
 output "external_ip_address_vm_2" {
   value = yandex_compute_instance.vm-2.network_interface.0.nat_ip_address
 }
+resource "yandex_alb_target_group" "foo" {
+  name           = "webservers"
 
+  target {
+    subnet_id    = "e9bijlmij63b0k7sbbtd"
+    ip_address   = "192.168.10.7"
+  }
+
+  target {
+    subnet_id    = "e2l412nkhbah6n2usa44"
+    ip_address   = "192.168.15.17"
+  }
+}
