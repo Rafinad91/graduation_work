@@ -125,3 +125,24 @@ http_backend {
     }
   }
 }
+resource "yandex_alb_http_router" "router" {
+  name          = "web-router"
+  labels        = {
+    tf-label    = "tf-label-value"
+    empty-label = ""
+  }
+}
+
+resource "yandex_alb_virtual_host" "my-virtual-host" {
+  name                    = "my-virtual-host"
+  http_router_id          = yandex_alb_http_router.router.id
+  route {
+    name                  = "web-router"
+    http_route {
+      http_route_action {
+        backend_group_id  = "ds750u9h33f6flrgvp6f"
+        timeout           = "60s"
+      }
+    }
+  }
+}    
