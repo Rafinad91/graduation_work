@@ -86,7 +86,7 @@ output "internal_ip_address_vm_2" {
 output "external_ip_address_vm_2" {
   value = yandex_compute_instance.vm-2.network_interface.0.nat_ip_address
 }
-resource "yandex_alb_target_group" "foo" {
+resource "yandex_alb_target_group" "webservers" {
   name           = "webservers"
 
   target {
@@ -97,5 +97,31 @@ resource "yandex_alb_target_group" "foo" {
   target {
     subnet_id    = "e2l412nkhbah6n2usa44"
     ip_address   = "192.168.15.17"
+  }
+}
+resource "yandex_alb_backend_group" "webservers-backend-group" {
+  name                     = "webservers-backend-group"
+  session_affinity {
+   connection {
+     source_ip = true
+    }
+  }
+http_backend {
+   name                   = "webservers-backend"
+    weight                 = 1
+    port                   = 80
+    target_group_ids       = ["ds74lkgaosgb4ec24t2a"]
+    load_balancing_config {
+     panic_threshold      = 90
+    }    
+    healthcheck {
+      timeout              = "10s"
+      interval             = "2s"
+      healthy_threshold    = 10
+      unhealthy_threshold  = 15 
+      http_healthcheck {
+        path               = "/"
+      }
+    }
   }
 }
