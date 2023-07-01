@@ -146,3 +146,29 @@ resource "yandex_alb_virtual_host" "my-virtual-host" {
     }
   }
 }    
+resource "yandex_alb_load_balancer" "load-balancer" {
+  name        = "balancer"
+  network_id  = "enp3gdj6d5s702dbhq0e"
+
+  allocation_policy {
+    location {
+      zone_id   = "ru-central1-a"
+      subnet_id = "e9bijlmij63b0k7sbbtd"  
+  }
+  }
+  listener {
+    name = "web-listener"
+    endpoint {
+      address {
+        external_ipv4_address {
+        }
+      }
+      ports = [ 80 ]
+    }
+    http {
+      handler {
+        http_router_id = "ds7r1mvrphrq1nt4j76v"
+      }
+    }
+  }
+}
