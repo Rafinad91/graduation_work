@@ -1,0 +1,26 @@
+---
+- hosts: webservers
+  remote_user: artem
+  become: yes
+  become_user: root
+  tasks:
+  - name: "epel-release"
+    yum: 
+      name: epel-release
+      update_cache: yes 
+      state: latest
+  - name: "nginx_install"
+    yum: 
+      name: nginx
+      update_cache: yes 
+      state: latest
+  - name: "nginx start"
+    service:
+      name: nginx
+      enabled: yes
+      state: started
+  - name: copy index_html
+    copy:
+      src: /home/index_html.j2
+      dest: /usr/share/nginx/html/index.html
+...
