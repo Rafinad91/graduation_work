@@ -155,6 +155,10 @@ resource "yandex_alb_load_balancer" "load-balancer" {
       zone_id   = "ru-central1-a"
       subnet_id = "e9bijlmij63b0k7sbbtd"  
   }
+  location {
+      zone_id   = "ru-central1-b"
+      subnet_id = "e2l412nkhbah6n2usa44"  
+  }
   }
   listener {
     name = "web-listener"
