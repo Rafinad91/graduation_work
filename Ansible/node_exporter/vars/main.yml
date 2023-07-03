@@ -1,0 +1,4 @@
+---
+# vars file for node_exported
+
+node_exporter: 1.2.2

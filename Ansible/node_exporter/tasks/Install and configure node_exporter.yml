@@ -1,0 +1,32 @@
+---
+- name: Create node_exporter user
+  user:
+    name: node_exporter
+    system: true
+
+- name: Download node_exporter
+  get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v1.2.2/node_exporter-1.2.2.linux-amd64.tar.gz"
+    dest: "/tmp/node_exporter.tar.gz"
+
+- name: Extract node_exporter
+  unarchive:
+    src: "/tmp/node_exporter.tar.gz"
+    dest: "/opt/"
+    remote_src: true
+    creates: "/opt/node_exporter-1.2.2"
+
+- name: Create systemd service file for node_exporter
+  copy:
+    src: /home/Ansible/node_exporter/templates/node_exporter.service
+    dest: /etc/systemd/system/node_exporter.service
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Start node_exporter service
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: yes

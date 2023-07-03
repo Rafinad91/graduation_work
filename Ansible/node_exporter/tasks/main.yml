@@ -1,0 +1,5 @@
+---
+# tasks file for node_exporter
+ 
+- name: Install node_exporter
+  include_tasks: tasks/Install and configure node_exporter.yml
