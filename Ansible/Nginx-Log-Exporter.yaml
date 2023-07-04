@@ -1,0 +1,23 @@
+---
+- hosts: webservers
+  remote_user: artem
+  become: yes
+  become_user: root
+  tasks:
+    - name: Download prometheus-nginxlog-exporter rpm package
+      become: true
+      get_url:
+       url: https://github.com/martin-helmich/prometheus-nginxlog-exporter/releases/download/v1.9.2/prometheus-nginxlog-exporter_1.9.2_linux_amd64.rpm
+       dest: /tmp/prometheus-nginxlog-exporter.rpm
+
+    - name: Install prometheus-nginxlog-exporter rpm package
+      become: true
+      yum:
+        name: /tmp/prometheus-nginxlog-exporter.rpm
+        state: present
+
+    - name: "prometheus-nginxlog-exporter start"
+      systemd:
+        name: prometheus-nginxlog-exporter
+        state: started
+        enabled: yes
