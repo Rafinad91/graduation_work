@@ -1,8 +1,11 @@
 ---
 - name: Create node_exporter user
+  become: true
   user:
     name: node_exporter
-    system: true
+    shell: /bin/false
+    system: yes
+    comment: "Node Exporter User"
 
 - name: Download node_exporter
   get_url:
@@ -12,21 +15,22 @@
 - name: Extract node_exporter
   unarchive:
     src: "/tmp/node_exporter.tar.gz"
-    dest: "/opt/"
+    dest: "/opt"
     remote_src: true
-    creates: "/opt/node_exporter-1.2.2"
-
+- name: Copy node_exporter binary to /usr/local/bin
+  become: true
+  copy:
+    src: /opt/node_exporter-1.2.2.linux-amd64/node_exporter
+    dest: /usr/local/bin/
+    remote_src: true   
 - name: Create systemd service file for node_exporter
   copy:
     src: /home/Ansible/node_exporter/templates/node_exporter.service
     dest: /etc/systemd/system/node_exporter.service
 
-- name: Reload systemd daemon
+- name: Restart and enable node_exporter service
+  become: true
   systemd:
-    daemon_reload: yes
-
-- name: Start node_exporter service
-  systemd:
-    name: node_exporter
-    state: started
+    name: node_exporter.service
+    state: restarted
     enabled: yes

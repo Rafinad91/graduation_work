@@ -1,0 +1,23 @@
+---
+- hosts: grafana
+  remote_user: artem
+  become: yes
+  become_user: root
+  tasks:
+    - name: Download grafana rpm package
+      become: true
+      get_url:
+       url: http://mirror.centos.org/centos/8-stream/AppStream/x86_64/os/Packages/grafana-9.2.10-4.el8.x86_64.rpm
+       dest: /tmp/grafana-9.2.10-4.el8.x86_64.rpm
+
+    - name: Install grafana rpm package
+      become: true
+      yum:
+        name: /tmp/grafana-9.2.10-4.el8.x86_64.rpm
+        state: present
+
+    - name: "grafana start"
+      systemd:
+        name: grafana-server
+        state: started
+        enabled: yes
