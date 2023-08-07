@@ -50,9 +50,12 @@
     dest=/etc/systemd/system/
   notify:
     - systemd restart
-
+- name: add metrics
+  template:
+    src=templates/prometheus.yml
+    dest=/etc/prometheus/
 - name: Systemctl Prometheus Start
   systemd:
     name: prometheus
-    state: started
+    state: restarted
     enabled: yes

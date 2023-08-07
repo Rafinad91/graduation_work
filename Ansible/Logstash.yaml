@@ -1,0 +1,24 @@
+---
+- hosts: webservers
+  remote_user: artem
+  become: yes
+  become_user: root
+  tasks:
+    - name: Start Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+    - name: Pull Logstash container
+      docker_image:
+        name: docker.elastic.co/logstash/logstash:7.14.0
+        source: pull
+
+    - name: Run Logstash container
+      docker_container:
+        name: logstash
+        image: docker.elastic.co/logstash/logstash:7.14.0
+        volumes:
+          - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+        depends_on:
+          - elasticsearch

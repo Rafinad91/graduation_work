@@ -1,0 +1,30 @@
+---
+- hosts: Elastic
+  remote_user: artem
+  become: yes
+  become_user: root
+  tasks:
+    - name: Download Elasticsearch rpm package
+      become: true
+      get_url:
+       url: https://mirror.g-soft.info/elasticsearch/elasticsearch-8.6.2-x86_64.rpm
+       dest: /tmp/elasticsearch-8.6.2-x86_64.rpm
+
+    - name: Install Java
+      yum:
+        name: java-1.8.0-openjdk
+        state: present
+
+    - name: Install Elasticsearch
+      yum:
+        name: /tmp/elasticsearch-8.6.2-x86_64.rpm
+        state: present
+
+    - name: Enable and start Elasticsearch service
+      systemd:
+        name: elasticsearch
+        enabled: true
+        state: started
+
+      
+
