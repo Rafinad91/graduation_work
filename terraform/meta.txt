@@ -1,0 +1,8 @@
+ #cloud-config
+ users:
+  - name: artem
+    groups: sudo
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCzW2ttCkPSnKCTdzCBY/ZrGsyjkmY+tykeZ1ybrzCQk3le6JNJ8d+mUU5I+lgkvHIQnPSGaSkbVtWUOKy9PIWkkt0L1S0wrbfydYWNMaB1x5jLEn/flUQ7QwUZJaQ17WYXtO68o0hVQ83zBB8/jHHr0IrE1cKukzZrZ940Up5mDmETDYtLFIqsr66JZ986k/OvK2GGf+xlJCUgBwLlrlUxqHZisCz6MpldVAYd5uX3ZtmsfT5GoBp70Y8B+wSIa77I0xCJQqfG08gTmlMprXYqVcJJ27nq3e9AcEZ1IT3QdmwQOeFwt3BVsCFIc+JSJprJCO7XZJQPE95VYjEqpS7W/aw3Zx7xsXatQC3xenfdK24f5HE9S5pKYjztUyzKs4aay03vyB0bTjSyrYMl6wmexqEjNs9E+DQrpPLW0CVeT46jQnIW8P6mtF82XS9WVFeML16p0X3r5CFDkPhHugr0B569l53uCTG4zKkr2YLNbkeMxlhHmbvADOK1Rfgz0SE= root@artem
