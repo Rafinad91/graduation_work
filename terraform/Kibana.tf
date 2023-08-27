@@ -14,7 +14,7 @@ resource "yandex_compute_instance" "Kibana" {
   }
   network_interface {
     subnet_id = "${yandex_vpc_subnet.subnet-1.id}"
-    nat       = true
+    nat = true
   }
   
   metadata = {
@@ -24,6 +24,16 @@ resource "yandex_compute_instance" "Kibana" {
 output "internal_ip_address_Kibana" {
   value = yandex_compute_instance.Kibana.network_interface.0.ip_address
 }
-output "external_ip_address_Kibana" {
-  value = yandex_compute_instance.Kibana.network_interface.0.nat_ip_address
+
+resource "yandex_vpc_security_group" "kibana_sg" {
+  name = "kibana-sg"
+  description = "Security group for kibana"
+  network_id  = "${yandex_vpc_network.network-1.id}"
+  ingress {
+    from_port = 5601
+    to_port = 5601
+    protocol = "tcp"
+    description = "kibana"
+    security_group_id = "${yandex_vpc_security_group.ssh_access_sg.id}"
+  }
 }

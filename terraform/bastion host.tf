@@ -1,6 +1,6 @@
 
-resource "yandex_compute_instance" "Grafana" {
-  name = "grafana"
+resource "yandex_compute_instance" "Bastion" {
+  name = "bastion"
   zone = "ru-central1-a"
   resources {
     cores  = 2
@@ -12,6 +12,7 @@ resource "yandex_compute_instance" "Grafana" {
       size = 20
     }
   }
+  
   network_interface {
     subnet_id = "${yandex_vpc_subnet.subnet-1.id}"
     nat = true
@@ -21,19 +22,21 @@ resource "yandex_compute_instance" "Grafana" {
     user-data = "${file("./meta.txt")}"
   }
 }
-output "internal_ip_address_Grafana" {
-  value = yandex_compute_instance.Grafana.network_interface.0.ip_address
+output "internal_ip_address_Bastion" {
+  value = yandex_compute_instance.Bastion.network_interface.0.ip_address
 }
-
-resource "yandex_vpc_security_group" "grafana_sg" {
-  name = "grafana-sg"
-  description = "Security group for Grafana"
+output "external_ip_address_Bastion" {
+  value = yandex_compute_instance.Bastion.network_interface.0.nat_ip_address
+}
+resource "yandex_vpc_security_group" "bastion_sg" {
+  name = "bastion-sg"
+  description = "Security group for bastion"
   network_id  = "${yandex_vpc_network.network-1.id}"
   ingress {
-    from_port = 3000
-    to_port = 3000
+    from_port = 22
+    to_port = 22
     protocol = "tcp"
-    description = "Grafana"
+    description = "bastion"
     security_group_id = "${yandex_vpc_security_group.ssh_access_sg.id}"
   }
 } 

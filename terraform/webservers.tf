@@ -13,9 +13,23 @@ provider "yandex" {
  folder_id = "b1gt86b9aq1ci5kanapu"
  zone = "ru-central1-a,ru-central1-b"
 }
+resource "yandex_vpc_subnet" "subnet-1" {
+  name           = "subnet1"
+   zone           = "ru-central1-a"
+   network_id     = "${yandex_vpc_network.network-1.id}"
+   v4_cidr_blocks = ["192.168.10.0/24"]
+}
+resource "yandex_vpc_subnet" "subnet-2" {
+  name           = "subnet2"
+   zone           = "ru-central1-b"
+   network_id     = "${yandex_vpc_network.network-1.id}"
+   v4_cidr_blocks = ["192.168.15.0/24"]
+  
+}
 resource "yandex_compute_instance" "vm-1" {
   name = "webserver-1"
   zone = "ru-central1-a"
+  allow_stopping_for_update = true
   resources {
     cores  = 2
     memory = 4
@@ -28,7 +42,7 @@ resource "yandex_compute_instance" "vm-1" {
   }
   network_interface {
     subnet_id = "${yandex_vpc_subnet.subnet-1.id}"
-    nat       = true
+    nat = true
   }
   
   metadata = {
@@ -51,7 +65,7 @@ resource "yandex_compute_instance" "vm-1" {
 
   network_interface {
     subnet_id = "${yandex_vpc_subnet.subnet-2.id}"
-    nat       = true
+    nat = true
   }
   
   metadata = {
@@ -62,29 +76,25 @@ resource "yandex_vpc_network" "network-1" {
   name = "network1"
 }
 
-resource "yandex_vpc_subnet" "subnet-1" {
-  name           = "subnet1"
-   zone           = "ru-central1-a"
-   network_id     = "${yandex_vpc_network.network-1.id}"
-   v4_cidr_blocks = ["192.168.10.0/24"]
-}
-resource "yandex_vpc_subnet" "subnet-2" {
-  name           = "subnet2"
-   zone           = "ru-central1-b"
-   network_id     = "${yandex_vpc_network.network-1.id}"
-   v4_cidr_blocks = ["192.168.15.0/24"]
-}
 output "internal_ip_address_vm_1" {
   value = yandex_compute_instance.vm-1.network_interface.0.ip_address
 }
-output "external_ip_address_vm_1" {
-  value = yandex_compute_instance.vm-1.network_interface.0.nat_ip_address
-}
+
 output "internal_ip_address_vm_2" {
   value = yandex_compute_instance.vm-2.network_interface.0.ip_address
 }
-output "external_ip_address_vm_2" {
-  value = yandex_compute_instance.vm-2.network_interface.0.nat_ip_address
+resource "yandex_vpc_security_group" "web_sg" {
+  name = "web-sg"
+  description = "Security group for web"
+  network_id  = "${yandex_vpc_network.network-1.id}"
+
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    description = "web"
+    security_group_id = "${yandex_vpc_security_group.ssh_access_sg.id}"
+  }
 }
 resource "yandex_alb_target_group" "webservers" {
   name           = "webservers"
@@ -99,18 +109,32 @@ resource "yandex_alb_target_group" "webservers" {
     ip_address   = "192.168.15.17"
   }
 }
+resource "yandex_alb_target_group" "grafana" {
+  name = "grafana-target-group"
+  target {
+    subnet_id    = "e9bijlmij63b0k7sbbtd"
+    ip_address   = "192.168.10.21"
+  }
+}
+resource "yandex_alb_target_group" "kibana" {
+  name = "kibana-target-group"
+  target {
+    subnet_id    = "e9bijlmij63b0k7sbbtd"
+    ip_address   = "192.168.10.14"
+  }
+}
 resource "yandex_alb_backend_group" "webservers-backend-group" {
-  name                     = "webservers-backend-group"
+  name                     = "public-backend-group"
   session_affinity {
    connection {
      source_ip = true
     }
   }
 http_backend {
-   name                   = "webservers-backend"
+   name                   = "web-backend"
     weight                 = 1
     port                   = 80
-    target_group_ids       = ["ds74lkgaosgb4ec24t2a"]
+    target_group_ids       = [yandex_alb_target_group.webservers.id]
     load_balancing_config {
      panic_threshold      = 90
     }    
@@ -124,7 +148,44 @@ http_backend {
       }
     }
   }
+http_backend {
+    name                   = "grafana-backend"
+    weight                 = 1
+    port                   = 3000
+    target_group_ids       = [yandex_alb_target_group.grafana.id]
+    load_balancing_config {
+      panic_threshold      = 90
+    }    
+    healthcheck {
+      timeout              = "10s"
+      interval             = "2s"
+      healthy_threshold    = 10
+      unhealthy_threshold  = 15 
+      http_healthcheck {
+        path               = "/"
+      }
+    }
+  }
+http_backend {
+    name                   = "kibana-backend"
+    weight                 = 1
+    port                   = 5601
+    target_group_ids       = [yandex_alb_target_group.kibana.id]
+    load_balancing_config {
+      panic_threshold      = 90
+    }    
+    healthcheck {
+      timeout              = "10s"
+      interval             = "2s"
+      healthy_threshold    = 10
+      unhealthy_threshold  = 15 
+      http_healthcheck {
+        path               = "/"
+      }
+    }
+  }
 }
+
 resource "yandex_alb_http_router" "router" {
   name          = "web-router"
   labels        = {
@@ -158,7 +219,7 @@ resource "yandex_alb_load_balancer" "load-balancer" {
   location {
       zone_id   = "ru-central1-b"
       subnet_id = "e2l412nkhbah6n2usa44"  
-  }
+   }
   }
   listener {
     name = "web-listener"
@@ -167,7 +228,7 @@ resource "yandex_alb_load_balancer" "load-balancer" {
         external_ipv4_address {
         }
       }
-      ports = [ 80 ]
+      ports = [ 80, 3000, 5601]
     }
     http {
       handler {
@@ -175,4 +236,5 @@ resource "yandex_alb_load_balancer" "load-balancer" {
       }
     }
   }
+  
 }
