@@ -42,7 +42,7 @@ resource "yandex_compute_instance" "vm-1" {
   }
   network_interface {
     subnet_id = "${yandex_vpc_subnet.subnet-1.id}"
-    nat = true
+    nat = false
   }
   
   metadata = {
@@ -65,7 +65,7 @@ resource "yandex_compute_instance" "vm-1" {
 
   network_interface {
     subnet_id = "${yandex_vpc_subnet.subnet-2.id}"
-    nat = true
+    nat = false
   }
   
   metadata = {

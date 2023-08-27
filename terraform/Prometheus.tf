@@ -15,7 +15,7 @@ resource "yandex_compute_instance" "Prometheus" {
   }
   network_interface {
     subnet_id = "${yandex_vpc_subnet.subnet-1.id}"
-    nat = true
+    nat = false
   }
   
   metadata = {
