@@ -26,11 +26,11 @@ scrape_configs:
   # metrics_path defaults to '/metrics'
   # scheme defaults to 'http'.
     static_configs:
-      - targets: ['localhost:9090', '158.160.38.214:9100', '51.250.30.89:9100']
+      - targets: ['localhost:9090', '192.168.15.17:9100', '192.168.10.7:9100']
   - job_name: "Nginx Log Exporter"
     scrape_interval: 5s
     static_configs:
-      - targets: ['158.160.38.214:4040', '51.250.30.89:4040']
+      - targets: ['192.168.15.17:4040', '192.168.10.7:4040']
 
 
 
