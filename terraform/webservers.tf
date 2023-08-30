@@ -8,9 +8,9 @@ terraform {
 }
 
 provider "yandex" {
- token     = ""
+ token     = var.yandex_oauth_token
  cloud_id  = "b1grkh9bt8a7nq2uptup"
- folder_id = "b1gt86b9aq1ci5kanapu"
+ folder_id = var.cloud_folder_id
  zone = "ru-central1-a,ru-central1-b"
 }
 resource "yandex_vpc_subnet" "subnet-1" {
