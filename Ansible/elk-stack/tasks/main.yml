@@ -1,0 +1,59 @@
+---
+- name: Install Docker
+  apt:
+    name: docker.io
+    state: present
+
+- name: Create network for ELK stack
+  docker_network:
+    name: elk_network
+
+- name: Start Elasticsearch container
+  docker_container:
+    name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - name: elk_network
+        ipv4_address: "{{ es_ip }}"
+
+- name: Start Kibana container
+  docker_container:
+    name: kibana
+    image: docker.elastic.co/kibana/kibana:8.8.1
+    ports:
+      - "5601:5601"
+    networks:
+      - name: elk_network
+        ipv4_address: "{{ kibana_ip }}"
+    environment:
+      ELASTICSEARCH_HOSTS: "http://{{ es_ip }}:9200"
+
+- name: Start Logstash container
+  docker_container:
+    name: logstash
+    image: docker.elastic.co/logstash/logstash:8.8.1
+    networks:
+      - name: elk_network
+        ipv4_address: "{{ logstash_ip }}"
+    volumes:
+      - "/var/tmp/config:/usr/share/logstash/pipeline/"
+    environment:
+      ELASTICSEARCH_HOSTS: "http://{{ es_ip }}:9200"
+
+- name: Start Filebeat containers
+  docker_container:
+    name: filebeat-{{ item }}
+    image: docker.elastic.co/beats/filebeat:8.8.1
+    volumes:
+      - "/var/tmp/filebeat/config:/usr/share/filebeat/"
+      - "/var/log/nginx/:/var/log/nginx"
+    networks:
+      - name: elk_network
+        ipv4_address: "{{ item }}"
+    environment:
+      ELASTICSEARCH_HOSTS: "http://{{ es_ip }}:9200"
+  loop: "{{ filebeat_ips }}"
+

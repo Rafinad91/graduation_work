@@ -1,0 +1,8 @@
+---
+es_ip: "netology-prod-platform-elastic.ru-central1-a.internal"
+kibana_ip: "netology-prod-platform-kibana.ru-central1-a.internal"
+logstash_ip: "netology-prod-platform-elastic.ru-central1-a.internal"
+filebeat_ips:
+  - "netology-prod-platform-webserver-1.ru-central1-a.internal"
+  - "netology-prod-platform-webserver-2.ru-central1-b.internal"
+
