@@ -9,7 +9,7 @@ resource "yandex_compute_instance" "Prometheus" {
   }
   boot_disk {
     initialize_params {
-      image_id = "fd87bs5724r0ngu3jlb6"
+      image_id = var.image_id_7
       size = 20
     }
   }

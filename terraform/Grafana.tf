@@ -8,7 +8,7 @@ resource "yandex_compute_instance" "Grafana" {
   }
   boot_disk {
     initialize_params {
-      image_id = "fd8hhtemghrl8qptlnfu"
+      image_id = var.image_id_8
       size = 20
     }
   }

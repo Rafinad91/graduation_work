@@ -25,6 +25,7 @@ resource "yandex_vpc_subnet" "subnet-2" {
    network_id     = "${yandex_vpc_network.network-1.id}"
    v4_cidr_blocks = ["192.168.15.0/24"]
   
+  
 }
 resource "yandex_compute_instance" "vm-1" {
   name = "webserver-1"
@@ -34,15 +35,17 @@ resource "yandex_compute_instance" "vm-1" {
     cores  = 2
     memory = 4
   }
+  
   boot_disk {
     initialize_params {
-      image_id = "fd87bs5724r0ngu3jlb6"
+      image_id = var.image_id_7
       size = 20
     }
   }
   network_interface {
-    subnet_id = "${yandex_vpc_subnet.subnet-1.id}"
+    subnet_id = var.subnet_id_1
     nat = false
+     ip_address = var.ip_address_vm_1
   }
   
   metadata = {
@@ -58,14 +61,15 @@ resource "yandex_compute_instance" "vm-1" {
   }
   boot_disk {
     initialize_params {
-      image_id = "fd87bs5724r0ngu3jlb6"
+      image_id = var.image_id_7
       size = 20
     }
   }
 
   network_interface {
-    subnet_id = "${yandex_vpc_subnet.subnet-2.id}"
+    subnet_id = var.subnet_id_2
     nat = false
+    ip_address = var.ip_address_vm_2
   }
   
   metadata = {
@@ -100,27 +104,27 @@ resource "yandex_alb_target_group" "webservers" {
   name           = "webservers"
 
   target {
-    subnet_id    = "e9bijlmij63b0k7sbbtd"
-    ip_address   = "192.168.10.7"
+    subnet_id    = var.subnet_id_1
+    ip_address   = var.ip_address_vm_1
   }
 
   target {
-    subnet_id    = "e2l412nkhbah6n2usa44"
-    ip_address   = "192.168.15.17"
+    subnet_id    = var.subnet_id_2
+    ip_address   = var.ip_address_vm_2
   }
 }
 resource "yandex_alb_target_group" "grafana" {
   name = "grafana-target-group"
   target {
-    subnet_id    = "e9bijlmij63b0k7sbbtd"
-    ip_address   = "192.168.10.21"
+    subnet_id    = var.subnet_id_1
+    ip_address   = var.ip_address_grafana
   }
 }
 resource "yandex_alb_target_group" "kibana" {
   name = "kibana-target-group"
   target {
-    subnet_id    = "e9bijlmij63b0k7sbbtd"
-    ip_address   = "192.168.10.14"
+    subnet_id    = var.subnet_id_1
+    ip_address   = var.ip_address_kibana
   }
 }
 resource "yandex_alb_backend_group" "webservers-backend-group" {
@@ -196,12 +200,12 @@ resource "yandex_alb_http_router" "router" {
 
 resource "yandex_alb_virtual_host" "my-virtual-host" {
   name                    = "my-virtual-host"
-  http_router_id          = yandex_alb_http_router.router.id
+  http_router_id          = "${yandex_alb_http_router.router.id}"
   route {
     name                  = "web-router"
     http_route {
       http_route_action {
-        backend_group_id  = "ds750u9h33f6flrgvp6f"
+        backend_group_id  = var.backend_group_id
         timeout           = "60s"
       }
     }
@@ -209,16 +213,16 @@ resource "yandex_alb_virtual_host" "my-virtual-host" {
 }    
 resource "yandex_alb_load_balancer" "load-balancer" {
   name        = "balancer"
-  network_id  = "enp3gdj6d5s702dbhq0e"
+  network_id  = "${yandex_vpc_network.network-1.id}"
 
   allocation_policy {
     location {
       zone_id   = "ru-central1-a"
-      subnet_id = "e9bijlmij63b0k7sbbtd"  
+      subnet_id = var.subnet_id_1  
   }
   location {
       zone_id   = "ru-central1-b"
-      subnet_id = "e2l412nkhbah6n2usa44"  
+      subnet_id = var.subnet_id_2  
    }
   }
   listener {
@@ -232,7 +236,7 @@ resource "yandex_alb_load_balancer" "load-balancer" {
     }
     http {
       handler {
-        http_router_id = "ds7r1mvrphrq1nt4j76v"
+        http_router_id = "${yandex_alb_http_router.router.id}"
       }
     }
   }

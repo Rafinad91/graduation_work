@@ -2,13 +2,14 @@
 resource "yandex_compute_instance" "Elasticsearch" {
   name = "elastic"
   zone = "ru-central1-a"
+  allow_stopping_for_update = true
   resources {
     cores  = 2
     memory = 4
   }
   boot_disk {
     initialize_params {
-      image_id = "fd87bs5724r0ngu3jlb6"
+      image_id = var.image_id_7
       size = 20
     }
   }

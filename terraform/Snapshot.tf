@@ -15,5 +15,5 @@ resource "yandex_compute_snapshot_schedule" "default" {
     }
   }
 
-  #disk_ids = ["epdgaoa8rbfrvuqa05o1", "fhmu66biv14b40vmklgi", "fhmhalmudfoom1j4aim7","fhmtmgqe6ugu0dufd783","fhmqrqhkuac4ooitvq8k","fhm3fciffuk5l7sqa4pu","fhmullsmpi46n9841ipe"]
+  #disk_ids = var.disk_ids
 }
