@@ -113,20 +113,6 @@ resource "yandex_alb_target_group" "webservers" {
     ip_address   = var.ip_address_vm_2
   }
 }
-resource "yandex_alb_target_group" "grafana" {
-  name = "grafana-target-group"
-  target {
-    subnet_id    = var.subnet_id_1
-    ip_address   = var.ip_address_grafana
-  }
-}
-resource "yandex_alb_target_group" "kibana" {
-  name = "kibana-target-group"
-  target {
-    subnet_id    = var.subnet_id_1
-    ip_address   = var.ip_address_kibana
-  }
-}
 resource "yandex_alb_backend_group" "webservers-backend-group" {
   name                     = "public-backend-group"
   session_affinity {
@@ -141,42 +127,6 @@ http_backend {
     target_group_ids       = [yandex_alb_target_group.webservers.id]
     load_balancing_config {
      panic_threshold      = 90
-    }    
-    healthcheck {
-      timeout              = "10s"
-      interval             = "2s"
-      healthy_threshold    = 10
-      unhealthy_threshold  = 15 
-      http_healthcheck {
-        path               = "/"
-      }
-    }
-  }
-http_backend {
-    name                   = "grafana-backend"
-    weight                 = 1
-    port                   = 3000
-    target_group_ids       = [yandex_alb_target_group.grafana.id]
-    load_balancing_config {
-      panic_threshold      = 90
-    }    
-    healthcheck {
-      timeout              = "10s"
-      interval             = "2s"
-      healthy_threshold    = 10
-      unhealthy_threshold  = 15 
-      http_healthcheck {
-        path               = "/"
-      }
-    }
-  }
-http_backend {
-    name                   = "kibana-backend"
-    weight                 = 1
-    port                   = 5601
-    target_group_ids       = [yandex_alb_target_group.kibana.id]
-    load_balancing_config {
-      panic_threshold      = 90
     }    
     healthcheck {
       timeout              = "10s"
@@ -230,9 +180,10 @@ resource "yandex_alb_load_balancer" "load-balancer" {
     endpoint {
       address {
         external_ipv4_address {
+          address = "51.250.79.233"
         }
       }
-      ports = [ 80, 3000, 5601]
+      ports = [80]
     }
     http {
       handler {

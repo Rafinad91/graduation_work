@@ -38,4 +38,7 @@ variable "image_id_7" {
 variable "image_id_8" {
   type = string
 }
+variable "load_balancer_ip" {
+  type = string
+}
 
